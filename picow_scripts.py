@@ -98,12 +98,14 @@ def on_message(topic, msg):
 
 
 def get_timestamp():
-    # Timestamp formatted in dd/mm/yy h/min/s, single digit values are padded to keep print lengths uniform
+    # Timestamp formatted in dd/mm/yyyy h min s, single digit values are padded to keep print lengths uniform
     year, month, day, hour, minute, second, _, _ = time.localtime()
     return "[{:02d}/{:02d}/{} {:02d}h {:02d}min {:02d}s]".format(day, month, year, hour, minute, second)
 
 
 def main():
+    # NOTE: The function requires influxDB, node-red and grafana to be installed and running.
+    #       Instructions on how to do that were deliberately left out.
     # Notes on how to start up applications if closed:
         # influxDB (mac --> influxd / windows --> cd <installation_path> --> .\influxd.exe)
         # open browser at localhost:8086 --> login creds: config.INFLUXDB_USER:config.INFLUXDB_PW
