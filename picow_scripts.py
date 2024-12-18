@@ -68,6 +68,8 @@ def setup_mqtt():
         context.verify_mode = ssl.CERT_NONE
         client = MQTTClient(client_id=config.MQTT_CLIENT, server=config.MQTT_BROKER, port=config.MQTT_PORT,
                             user=config.MQTT_USERNAME, password=config.MQTT_PW, ssl=context, keepalive=7200)
+        timestamp = get_timestamp()
+        print(f"{timestamp} [DEBUG] MQTTClient object: {client}")
         client.reconnect()  # Used in place of client.connect() due to problems with restarting the MQTTClient
         return client
     except OSError:
@@ -119,7 +121,8 @@ def main():
     # Finally, it will listen to messages in config.MQTT_CLIENT/control topic and send messages to
     # config.MQTT_CLIENT/temperature and config.MQTT_CLIENT/pressure topics.
     
-    # Pressure is modified and rounded to represent hPa instead of Pa, temperature is displayed as is.
+    # Pressure is modified and rounded to represent hPa instead of Pa.
+    # Temperature and pressure are rounded to 2 decimal places.
     wlan, _ = connect_to_wifi()
     client = setup_mqtt()
     try:
@@ -128,10 +131,10 @@ def main():
         client.set_callback(on_message)
         client.subscribe(b"{}/control".format(config.MQTT_CLIENT))
         while True:
-            publish_with_mqtt(client, f"{config.MQTT_CLIENT}/temp", str(bmp.temperature))
+            publish_with_mqtt(client, f"{config.MQTT_CLIENT}/temp", str(round(float(bmp.temperature), 2)))
             publish_with_mqtt(client, f"{config.MQTT_CLIENT}/pressure", str(round((float(bmp.pressure) / 100), 2)))
             client.check_msg()
-            time.sleep(5)
+            time.sleep(1)
             # If the WiFi connection breaks at any point while running the program, tries to reconnect 5 times.
             # If reconnection is unsuccessful, will stop the program completely
             if wlan.status() != 3:
